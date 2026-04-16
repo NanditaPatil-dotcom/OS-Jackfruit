@@ -7,7 +7,7 @@ PWD := $(shell pwd)
 # toolchain supports it.
 WORKLOAD_LDFLAGS ?= -static
 
-USER_TARGETS := engine memory_hog cpu_hog io_pulse
+USER_TARGETS := engine memory_hog cpu_hog io_pulse slow_memory
 
 all: $(USER_TARGETS) module
 
@@ -28,6 +28,9 @@ cpu_hog: cpu_hog.c
 io_pulse: io_pulse.c
 	gcc -O2 -Wall $(WORKLOAD_LDFLAGS) -o io_pulse io_pulse.c
 
+slow_memory: slow_memory.c
+	gcc -O2 -Wall $(WORKLOAD_LDFLAGS) -o slow_memory slow_memory.c
+
 monitor.ko: monitor.c monitor_ioctl.h
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
 
@@ -39,3 +42,5 @@ clean:
 	rm -f /tmp/mini_runtime.sock
 
 .PHONY: all ci module clean
+
+ci: engine cpu_hog memory_hog io_pulse slow_memory
