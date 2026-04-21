@@ -2,21 +2,25 @@
  * monitor.c - Multi-Container Memory Monitor (Linux Kernel Module)
  */
 
+#include <linux/module.h>   // MUST be first
+#include <linux/init.h>
+#include <linux/kernel.h>
+
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/fs.h>
-#include <linux/kernel.h>
 #include <linux/list.h>
 #include <linux/mm.h>
-#include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/pid.h>
 #include <linux/sched/signal.h>
 #include <linux/slab.h>
-#include <linux/timer.h>
+
+#include <linux/timer.h>    // comes AFTER core headers
+#include <linux/jiffies.h>
+
 #include <linux/uaccess.h>
 #include <linux/version.h>
-
 #include "monitor_ioctl.h"
 
 #define DEVICE_NAME "container_monitor"
@@ -221,7 +225,7 @@ static void __exit monitor_exit(void)
 {
     struct monitored_entry *entry, *tmp;
 
-    del_timer_sync(&monitor_timer);
+    timer_delete_sync(&monitor_timer);
 
     mutex_lock(&list_lock);
     list_for_each_entry_safe(entry, tmp, &monitored_list, list) {
